@@ -84,6 +84,7 @@ h2{
 	font-size: 30px;
 	color: #1D6154
 }
+
 nav ul {
 	display: flex;
 	align-items: center;
@@ -136,6 +137,36 @@ li:hover {
 .gallery img {
 	width: 100%;
 
+}
+.btn{
+	border: 1px solid #1D6154;
+    border-radius: 60px;
+    height: 37px;
+    margin-top: 51px;
+	margin-bottom: 51px;
+	margin-right: 10px;
+	font-family: 'Syne';
+	font-weight: 700;
+    font-size: 16px;
+}
+.btn-tous{
+	background: #FFFFFF;
+	padding-left: 30px;
+	padding-right: 30px;
+	color: #1D6154;
+	cursor: pointer;
+}
+.btn-objets{
+	background: #FFFFFF;
+	color: #1D6154;
+	padding-left: 20px;
+	padding-right: 20px;
+	cursor: pointer;
+}
+.btn-clicked{
+	background: #1D6154;
+	color: #FFFFFF;
+	cursor: pointer;
 }
 #contact {
 	width: 50%;
