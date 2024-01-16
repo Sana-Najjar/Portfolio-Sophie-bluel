@@ -3,131 +3,125 @@ let token = localStorage.getItem('token');
 
 //Affichage des projets dans la page
 
-function viewProjects(){
-fetch("http://localhost:5678/api/works")
-    .then(response => response.json())
-    .then(data => {
-        for (let i=0; i< data.length; i++){
-            const figure = document.createElement("figure");
-            const img = document.createElement("img");
-            const figcaption = document.createElement("figcaption");
-            const gallery= document.querySelector(".gallery");
-            img.src=data[i].imageUrl;
-            img.alt=data[i].title;
-            figure.appendChild(img);
-            figcaption.innerHTML=data[i].title;
-            figure.appendChild(figcaption);
-            gallery.appendChild(figure) 
-            projects.push(data);
-        } 
-    })
+async function viewProjects() {
+
+    response = await fetch("http://localhost:5678/api/works");
+    data = await response.json();
+    const gallery = document.querySelector(".gallery");
+    for (let i = 0; i < data.length; i++) {
+        const figure = document.createElement("figure");
+        const img = document.createElement("img");
+        const figcaption = document.createElement("figcaption");
+        img.src = data[i].imageUrl;
+        img.alt = data[i].title;
+        figure.appendChild(img);
+        figcaption.innerHTML = data[i].title;
+        figure.appendChild(figcaption);
+        gallery.appendChild(figure);
+    }
 }
 viewProjects()
+
 //Bouton logout
 const logoutButton = document.querySelector(".logoutButton")
 logoutButton.addEventListener('click', () => {
-        localStorage.clear();
-        location.reload();
+    localStorage.clear();
+    location.reload();
 })
+
 //Gestion de l'affichage du modale
-let modal=null
-const openModal = function(e){
-    e.preventDefault()
-    const target=document.querySelector(e.target.getAttribute('href'))
-    target.style.display=null
-    target.removeAttribute('aria-hidden')
-    target.setAttribute('aria-modal','true')
-    modal=target
-    modal.addEventListener('click',closeModal)
-    modal.querySelector('.js-modal-close').addEventListener('click',closeModal)
-    modal.querySelector('.js-modal-stop').addEventListener('click',stopPropagation)
+
+let modal1 = null;
+
+function openModal(targetModal) {
+    return function (e) {
+        e.preventDefault();
+        const target = document.querySelector(e.target.getAttribute('href'))
+        target.style.display = null
+        target.removeAttribute('aria-hidden')
+        target.setAttribute('aria-modal', 'true')
+        targetModal = target
+        targetModal.addEventListener('click', closeModal(targetModal));
+        targetModal.querySelector('.js-modal-close').addEventListener('click', closeModal(targetModal))
+        targetModal.querySelector('.js-modal-stop').addEventListener('click', stopPropagation)
+
+    }
 }
-const closeModal=function(e){
-    if(modal===null)return
-    e.preventDefault()
-    modal.style.display="none"
-    modal.setAttribute('aria-hidden','true')
-    modal.removeAttribute('aria-modal')
-    modal.removeEventListener('click',closeModal)
-    modal.querySelector('.js-modal-close').removeEventListener('click',closeModal)
-    modal.querySelector('.js-modal-stop').removeEventListener('click',stopPropagation)
-    modal=null
+
+function closeModal(targetModal) {
+    return function (e) {
+        if (targetModal === null) return
+        e.preventDefault();
+        targetModal.style.display = "none"
+        targetModal.setAttribute('aria-hidden', 'true')
+        targetModal.removeAttribute('aria-modal')
+        targetModal.removeEventListener('click', closeModal(targetModal))
+        targetModal.querySelector('.js-modal-close').removeEventListener('click', closeModal(targetModal))
+        targetModal.querySelector('.js-modal-stop').removeEventListener('click', stopPropagation)
+        targetModal = null
+
+    }
 }
-const stopPropagation = function(e){
+
+const stopPropagation = function (e) {
     e.stopPropagation()
 }
-document.querySelectorAll('.js-modal').forEach(a=>{
-    a.addEventListener('click',openModal)
+const openModal1 = openModal(modal1);
+const closeModal1 = closeModal(modal1);
+document.querySelectorAll('.js-modal').forEach(a => {
+    a.addEventListener('click', openModal1)
 })
-document.querySelectorAll('.modal1').forEach(a=>{
-    a.addEventListener('click',viewProjects())
+document.querySelectorAll('.modal1').forEach(a => {
+    a.addEventListener('click', viewProjects())
 })
-let modal2=null
-const openModal2 = function(e){
-    e.preventDefault()
-    const target=document.querySelector(e.target.getAttribute('href'))
-    target.style.display=null
-    target.removeAttribute('aria-hidden')
-    target.setAttribute('aria-modal','true')
-    modal2=target
-    modal2.addEventListener('click',closeModal2)
-    modal2.querySelector('.js-modal-close2').addEventListener('click',closeModal2)
-    modal2.querySelector('.js-modal-stop2').addEventListener('click',stopPropagation)
-}
-const closeModal2=function(e){
-    if(modal2===null)return
-    e.preventDefault()
-    modal2.style.display="none"
-    modal2.setAttribute('aria-hidden','true')
-    modal2.removeAttribute('aria-modal')
-    modal2.removeEventListener('click',closeModal2)
-    modal2.querySelector('.js-modal-close2').removeEventListener('click',closeModal2)
-    modal2.querySelector('.js-modal-stop2').removeEventListener('click',stopPropagation)
-    modal2=null
-}
-document.querySelectorAll('.add-btn').forEach(a=>{
-    a.addEventListener('click',openModal2)
+let modal2 = null;
+const openModal2 = openModal(modal2);
+const closeModal2 = closeModal(modal2);
+document.querySelectorAll('.add-btn').forEach(a => {
+    a.addEventListener('click', openModal2)
 })
-document.querySelector("#btn-back").addEventListener("click",function(e){
+document.querySelector("#btn-back").addEventListener("click", function (e) {
     e.preventDefault();
-    document.querySelector("#modal1").style.display="null"
-    document.querySelector("#modal2").style.display="none"
-})
+    document.querySelector("#modal1").style.display = "null"
+    document.querySelector("#modal2").style.display = "none"
+});
+
+
 //Création des élements du modale
 
-fetch("http://localhost:5678/api/works")
-    .then(response => response.json())
-    .then(data => {
-        for(let i=0; i< data.length; i++){
-            let figure = document.createElement("figure");
-            let span =document.createElement("span");
-            let zoom=document.createElement("span");
-            let img = document.createElement("img");
-            let figcaption = document.createElement("figcaption");
-            const galleryModal= document.querySelector(".gallery-modal");
-            span.innerHTML = `<i class="fa-solid fa-trash-can"></i>`;
-            img.src=data[i].imageUrl;
-            img.classList.add("imgModale");
-            span.classList.add("deleteProject");
-            span.classList.add("icon-div-style-shown");
-            galleryModal.append(figure);
-            figure.append(zoom);
-            figure.append(span,img,figcaption);
-            zoom.classList.add("icon-div-arrows")
-            zoom.classList.add("icon-div-style-not-shown")
-            const firstArrowsIcon = document.querySelector('.icon-div-arrows:first-child');
-            firstArrowsIcon.classList.replace('icon-div-style-not-shown', 'icon-div-style-shown');
-            span.addEventListener("click",(index)=>{
-                   console.log(data[i].id)
-                   alert('êtes-vous sûr de vouloir supprimer ce projet?')
-                   deleteRequest(data[i].id);
-                   if (index=data[i].id) {
-                     data.splice(index,1)
-                   }
-                   location.reload();
-            })
-        }
-    })
+async function createModal() {
+    const response = await fetch("http://localhost:5678/api/works");
+    const data = await response.json();
+    for (let i = 0; i < data.length; i++) {
+        let figure = document.createElement("figure");
+        let span = document.createElement("span");
+        let zoom = document.createElement("span");
+        let img = document.createElement("img");
+        let figcaption = document.createElement("figcaption");
+        const galleryModal = document.querySelector(".gallery-modal");
+        span.innerHTML = `<i class="fa-solid fa-trash-can"></i>`;
+        img.src = data[i].imageUrl;
+        img.classList.add("imgModale");
+        span.classList.add("deleteProject");
+        span.classList.add("icon-div-style-shown");
+        galleryModal.append(figure);
+        figure.append(zoom);
+        figure.append(span, img, figcaption);
+        zoom.classList.add("icon-div-arrows");
+        zoom.classList.add("icon-div-style-not-shown");
+        const firstArrowsIcon = document.querySelector('.icon-div-arrows:first-child');
+        firstArrowsIcon.classList.replace('icon-div-style-not-shown', 'icon-div-style-shown');
+        span.addEventListener("click", async () => {
+            const userConfirmation = window.confirm('Êtes-vous sûr de vouloir supprimer ce projet?');
+            if (userConfirmation) {
+                await deleteRequest(data[i].id);
+                data.splice(i, 1);
+                location.reload();
+            }
+        })
+    }
+}
+createModal();
 
 //Suppression de travaux existants
 
@@ -143,9 +137,7 @@ function deleteRequest(id) {
                 throw new Error('Network response was not OK');
             };
         })
-        .catch((error) => {
-            console.error('There has been a problem with your fetch operation:', error);
-        })
+
 }
 
 ///// preview image before upload
@@ -179,15 +171,15 @@ viewPhoto();
 
 //changement du style du bouton valider
 
-const form= document.querySelector("#formElem");
+const form = document.querySelector("#formElem");
 form.addEventListener('input', () => {
-  const upFile = document.querySelector('#upfile');
-  const title = document.querySelector('#title');
-  if (upFile.files[0] && title.value) {
-      document.querySelector('.validate-submit-button').style.background = '#1D6154';
-  } else {
-      document.querySelector('.validate-submit-button').style.background = '#A7A7A7';
-  }
+    const upFile = document.querySelector('#upfile');
+    const title = document.querySelector('#title');
+    if (upFile.files[0] && title.value) {
+        document.querySelector('.validate-submit-button').style.background = '#1D6154';
+    } else {
+        document.querySelector('.validate-submit-button').style.background = '#A7A7A7';
+    }
 })
 
 //Vérification des champs remplis
@@ -204,33 +196,29 @@ function checkAddForm() {
 
 //Ajout d'un nouveau projet
 
-form.addEventListener("submit",async(e)=>{
+form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    if(checkAddForm() === true){
-    const newProject = new FormData(form);
-    fetch('http://localhost:5678/api/works', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-        },
-        body: newProject,
-    })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error('Network response was not OK');
-            };
-            return response.json();
+    if (checkAddForm() === true) {
+        const newProject = new FormData(form);
+        fetch('http://localhost:5678/api/works', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            body: newProject,
         })
-        .then((value) => {
-            console.log(value);
-            projects.push(value);
-        })
-         .then(() => {
-            location.reload();
-            viewProjects();
-        })
-        .catch((error) => {
-            console.error('There has been a problem with your fetch operation:', error);
-        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not OK');
+                };
+                return response.json();
+            })
+            .then((value) => {
+                projects.push(value);
+            })
+            .then(() => {
+                location.reload();
+                viewProjects();
+            })
     }
 })

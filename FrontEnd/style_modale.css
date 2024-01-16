@@ -264,7 +264,7 @@ footer nav ul {
     text-align: center;
     font-size: 26px;
 }
-.js-modal-close , .js-modal-close2{
+.js-modal-close {
     position: relative;
     left: 320px;
     cursor: pointer;
