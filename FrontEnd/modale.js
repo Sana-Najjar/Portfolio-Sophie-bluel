@@ -27,6 +27,7 @@ const logoutButton = document.querySelector(".logoutButton")
 logoutButton.addEventListener('click', () => {
     localStorage.clear();
     location.reload();
+
 })
 
 //Gestion de l'affichage du modale
@@ -125,14 +126,14 @@ createModal();
 
 //Suppression de travaux existants
 
-function deleteRequest(id) {
-    fetch('http://localhost:5678/api/works/' + id, {
+async function deleteRequest(id) {
+    await fetch('http://localhost:5678/api/works/' + id, {
         method: 'DELETE',
         headers: {
             'Authorization': `Bearer ${token}`,
         },
     })
-        .then((response) => {
+        .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not OK');
             };
@@ -175,7 +176,8 @@ const form = document.querySelector("#formElem");
 form.addEventListener('input', () => {
     const upFile = document.querySelector('#upfile');
     const title = document.querySelector('#title');
-    if (upFile.files[0] && title.value) {
+    const categoryId = document.querySelector('#category');
+    if (upFile.files[0] && title.value && categoryId.value) {
         document.querySelector('.validate-submit-button').style.background = '#1D6154';
     } else {
         document.querySelector('.validate-submit-button').style.background = '#A7A7A7';
@@ -187,38 +189,44 @@ form.addEventListener('input', () => {
 function checkAddForm() {
     const upFile = document.querySelector('#upfile');
     const title = document.querySelector('#title');
-    if (!(upFile.files[0]) || !(title.value)) {
+    const categoryId = document.querySelector('#category');
+    if (!(upFile.files[0]) || !(title.value.trim()) || !(categoryId.value !== "")) {
         alert('Tous les champs doivent être remplis.');
         return false;
     }
     return true;
 }
-
+const btn = document.getElementById("newwork");
 //Ajout d'un nouveau projet
-
-form.addEventListener("submit", async (e) => {
+btn.addEventListener("click", async (e) => {
     e.preventDefault();
-    if (checkAddForm() === true) {
-        const newProject = new FormData(form);
-        fetch('http://localhost:5678/api/works', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-            body: newProject,
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Network response was not OK');
-                };
-                return response.json();
-            })
-            .then((value) => {
-                projects.push(value);
-            })
-            .then(() => {
-                location.reload();
-                viewProjects();
-            })
+    console.log(checkAddForm())
+    if (checkAddForm()) {
+        try {
+            const newProject = new FormData(form);
+            const response = await fetch('http://localhost:5678/api/works', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: newProject,
+                })
+            const data = await response.json();
+            if (data.id) {
+                 viewProjects();
+               // openModal1(modal1);
+            } else if (response.status === 400) {
+                alert("Merci de remplir tous les champs");
+            } else if (response.status === 500) {
+                alert("Erreur serveur");
+            } else if (response.status === 401) {
+                alert("Vous n'êtes pas autorisé à ajouter un projet");
+                window.location.href = "login.html";
+            }
+        }
+        catch (error) {
+            console.log(error);
+        }
+        return false
     }
 })
