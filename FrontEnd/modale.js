@@ -8,6 +8,7 @@ async function viewProjects() {
     response = await fetch("http://localhost:5678/api/works");
     data = await response.json();
     const gallery = document.querySelector(".gallery");
+    gallery.innerHTML = "";
     for (let i = 0; i < data.length; i++) {
         const figure = document.createElement("figure");
         const img = document.createElement("img");
@@ -93,13 +94,15 @@ document.querySelector("#btn-back").addEventListener("click", function (e) {
 async function createModal() {
     const response = await fetch("http://localhost:5678/api/works");
     const data = await response.json();
+    const galleryModal = document.querySelector(".gallery-modal");
+    galleryModal.innerHTML = "";
     for (let i = 0; i < data.length; i++) {
         let figure = document.createElement("figure");
         let span = document.createElement("span");
         let zoom = document.createElement("span");
         let img = document.createElement("img");
         let figcaption = document.createElement("figcaption");
-        const galleryModal = document.querySelector(".gallery-modal");
+        //const galleryModal = document.querySelector(".gallery-modal");
         span.innerHTML = `<i class="fa-solid fa-trash-can"></i>`;
         img.src = data[i].imageUrl;
         img.classList.add("imgModale");
@@ -117,27 +120,58 @@ async function createModal() {
             if (userConfirmation) {
                 await deleteRequest(data[i].id);
                 data.splice(i, 1);
-                location.reload();
+                reloadModal();
             }
         })
     }
 }
 createModal();
 
+function reloadModal() {
+    const galleryModal = document.querySelector(".gallery-modal");
+    document.querySelector("#modal2").style.display = "none";
+    galleryModal.innerHTML = " ";
+    createModal();
+}
+
+function resetForm() {
+    const form = document.getElementById("formElem");
+    form.reset();
+    const newPhoto = document.querySelector('.new-image-style');
+    newPhoto.style.display = 'none';
+    const landscapeIcon = document.querySelector('.landscape-icon');
+    landscapeIcon.style.display = 'block';
+    const addPhotoLabel = document.getElementById('add-photo-label');
+    addPhotoLabel.style.display = 'block';
+    const validateButton = document.querySelector('.validate-submit-button');
+    validateButton.style.background = '#A7A7A7';
+}
+
+
 //Suppression de travaux existants
 
 async function deleteRequest(id) {
-    await fetch('http://localhost:5678/api/works/' + id, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-        },
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not OK');
-            };
-        })
+
+    try {
+        await fetch(
+            'http://localhost:5678/api/works/' + id, {
+            method: "DELETE",
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+        if (response.ok) {
+            const elementId = document.getElementById(`${id}`);
+            if (elementId) { 
+                elementId.remove(); 
+            }
+            await viewProjects();
+
+        }
+    } catch (error) {
+        window.alert("La requête a échouée :(");
+    }
+
 
 }
 
@@ -196,26 +230,32 @@ function checkAddForm() {
     }
     return true;
 }
-const btn = document.getElementById("newwork");
+
+
 //Ajout d'un nouveau projet
-btn.addEventListener("click", async (e) => {
+
+form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    console.log(checkAddForm())
     if (checkAddForm()) {
         try {
             const newProject = new FormData(form);
             const response = await fetch('http://localhost:5678/api/works', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                    body: newProject,
-                })
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: newProject,
+            })
             const data = await response.json();
-            if (data.id) {
-                 viewProjects();
-               // openModal1(modal1);
-            } else if (response.status === 400) {
+            if (response.ok) {
+                if (data.id) {
+                    viewProjects();
+                    reloadModal();
+                    resetForm();
+
+                }
+            }
+            else if (response.status === 400) {
                 alert("Merci de remplir tous les champs");
             } else if (response.status === 500) {
                 alert("Erreur serveur");
