@@ -153,7 +153,7 @@ function resetForm() {
 async function deleteRequest(id) {
 
     try {
-        await fetch(
+       const response = await fetch(
             'http://localhost:5678/api/works/' + id, {
             method: "DELETE",
             headers: {
